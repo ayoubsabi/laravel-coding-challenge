@@ -15,55 +15,22 @@ class ProductRepository extends BaseRepository
     /**
      * {@inheritdoc}
      */
-    public function queryBuilder(Builder $queryBuilder, array $criteria = [], array $orderBy = [])
+    protected function queryBuilder(Builder $queryBuilder, array $criteria = [], array $orderBy = [])
     {
-        if(!empty($criteria)) {
+        if(isset($criteria['category_id'])) {
 
-            $queryBuilder->where(function ($query) use ($criteria) {
-                        
-                foreach ($criteria as $column => $value) {
-
-                    if(!empty($value)) {
-
-                        switch (true) {
-
-                            case is_numeric($value):
-                                $query->where($column, $value);
-                                break;
-
-                            case is_array($value):
-                                $query->whereIn($column, $value);
-                                break;
-
-                            case preg_match('/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/', $value):
-                                $query->whereDate($column, $value);
-                                break;                      
-
-                            default:
-                                $query->where($column, 'like', "%$value%");
-                                break;
-                        }
-
-                    }
-
-                }
-
-            });
+            $queryBuilder->where('category_id', $criteria['category_id']);
 
         }
 
-        if(!empty($orderBy)) {
+        foreach (['name', 'price'] as $field) {
 
-            foreach ($orderBy as $fields => $order) {
+            if(isset($orderBy[$field])) {
 
-                $fields = explode(',', $fields);
+                $order = $orderBy[$field];
 
-                foreach ($fields as $field) {
-
-                    $queryBuilder
-                        ->orderBy($field, $order);
-
-                }
+                $queryBuilder
+                    ->orderBy($field, $order);
 
             }
 
