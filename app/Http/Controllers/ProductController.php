@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Services\ProductService;
 use App\Services\Product\IndexService;
 use App\Services\Product\StoreService;
 use App\Http\Requests\Product\IndexFormRequest;
 use App\Http\Requests\Product\StoreFormRequest;
+use App\Http\Requests\Product\UpdateFormRequest;
 
 class ProductController extends Controller
 {
+    public function __construct(ProductService $productService)
+    {
+        $this->productService = $productService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +25,7 @@ class ProductController extends Controller
      */
     public function index(IndexFormRequest $request)
     {
-        return app(IndexService::class)->handle($request->validated());
+        return $this->productService->getProducts($request->validated());
     }
 
     /**
@@ -28,6 +36,30 @@ class ProductController extends Controller
      */
     public function store(StoreFormRequest $request)
     {
-        return app(StoreService::class)->handle($request->validated());
+        return $this->productService->createProduct($request->validated());
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Product  $product
+     * @param  \App\Http\Requests\Product\UpdateFormRequest $request
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Product $product, UpdateFormRequest $request)
+    {
+        return $this->productService->updateProduct($product, $request->validated());
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Product $product)
+    {
+        return $this->productService->deleteProduct($product);
     }
 }
