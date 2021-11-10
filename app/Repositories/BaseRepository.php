@@ -18,7 +18,7 @@ abstract class BaseRepository
 
     public function __call($name, $arguments)
     {
-        $this->model->$name(...$arguments);
+        return $this->model->$name(...$arguments) ?? $this->model::$name(...$arguments);
     }
 
     /**
