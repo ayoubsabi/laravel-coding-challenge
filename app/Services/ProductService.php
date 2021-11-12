@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Response;
+use App\Models\Product;
 use App\Repositories\ProductRepository;
-use App\Http\Resources\Product\Resource;
-use App\Http\Resources\Product\Collection;
 
 class ProductService
 {
@@ -17,59 +15,72 @@ class ProductService
         $this->products = $products;
     }
 
-    public function getProducts($data)
+    /**
+     * Get products.
+     *
+     * @param  array  $criteria
+     * 
+     * @return Product[]
+     */
+    public function getProducts(array $criteria, array $orderBy)
     {
-        $orderBy = [];
-
-        if(isset($data['order_by'])) {
-
-            $orderBy = $data['order_by'];
-            unset($data['order_by']);
-
-        }
-
-        return response(new Collection(
-                $this->products->getBy($data, $orderBy)
-            ),
-            Response::HTTP_CREATED
-        );
+        return $this->products->getBy($criteria, $orderBy);
     }
 
-    public function createProduct($data)
+    /**
+     * Get product by id.
+     *
+     * @param  int $id
+     * 
+     * @return Product
+     */
+    public function getProductById(int $id)
     {
-        return response([
-            'data' => new Resource(
-                $this->products->create(
-                    array_merge($data, [
-                        'image' => (
-                            (new LocalFileUploadService($data['image']))
-                                ->save(self::IMAGE_PATH)
-                                ->getFileName()
-                        )
-                    ])
+        return $this->products->find($id);
+    }
+
+    /**
+     * Create product.
+     *
+     * @param  array  $data
+     * 
+     * @return Product
+     */
+    public function createProduct(array $data)
+    {
+        return $this->products->create(
+            array_merge($data, [
+                'image' => (
+                    (new LocalFileUploadService($data['image']))
+                        ->save(self::IMAGE_PATH)
+                        ->getFileName()
                 )
-            )],
-            Response::HTTP_CREATED
+            ])
         );
     }
 
-    public function updateProduct($product, $data)
+    /**
+     * Update product.
+     *
+     * @param  Product $product
+     * @param  array  $data
+     * 
+     * @return bool
+     */
+    public function updateProduct(Product $product, array $data)
     {
-        $product->update($data);
-
-        return response(
-            $product,
-            Response::HTTP_CREATED
-        );
+        return $product->update($data);
     }
 
-    public function deleteProduct($product)
+    /**
+     * Delete product.
+     *
+     * @param  Product $product
+     * 
+     * @return bool|null
+     */
+    public function deleteProduct(Product $product)
     {
-        $product->delete();
-
-        return response(
-            null,
-            Response::HTTP_NO_CONTENT
-        );
+        return $product->delete();
     }
 }
