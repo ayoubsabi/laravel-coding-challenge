@@ -2,33 +2,25 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
 abstract class BaseRepository
 {
     protected static $itemPerPage = 10;
 
-    protected $model;
-
-    public function __construct(Model $model)
-    {
-        $this->model = $model;
-    }
-
+    /**
+     * Call predefined model's functions
+     * 
+     * @return mixed
+     */
     public function __call($name, $arguments)
     {
-        return $this->model->$name(...$arguments) ?? $this->model::$name(...$arguments);
-    }
+        $model = sprintf(
+            'App\Models\%s',
+            str_replace('Repository', '', class_basename(static::class))
+        );
 
-    /**
-     * @method all()
-     * 
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    protected function all(string $fields = '*')
-    {
-        return $this->model->select($fields);
+        return $model::$name(...$arguments);
     }
 
     /**
@@ -36,6 +28,7 @@ abstract class BaseRepository
      * 
      * @param array $orderBy
      * @param bool $pagination
+     * 
      * @return Object[]
      */
     public function getAll(array $orderBy = [], bool $pagination = true)
@@ -49,17 +42,24 @@ abstract class BaseRepository
      * @param array $criteria
      * @param array $orderBy
      * @param bool $pagination
+     * 
      * @return Object[]
      */
     public function getBy(array $criteria = [], array $orderBy = [], bool $pagination = true)
     {
+        $queryBuilder = $this->prepareQueryFilters(
+            $this->createQueryBuilder(),
+            $criteria
+        );
+
+        $queryBuilder = $this->orderBy(
+            $queryBuilder,
+            $orderBy
+        );
+
         $get = $pagination ? 'paginate' : 'get';
 
-        return $this->queryBuilder(
-            $this->all(),
-            $criteria,
-            $orderBy
-        )->$get(!$pagination ?: static::$itemPerPage);
+        return $queryBuilder->$get(!$pagination ?: static::$itemPerPage);
     }
 
     /**
@@ -69,21 +69,46 @@ abstract class BaseRepository
      */
     public function getOneBy(array $criteria = [])
     {
-        return $this->queryBuilder(
-            $this->all(),
+        return $this->prepareQueryFilters(
+            $this->createQueryBuilder(),
             $criteria
         )->first();
     }
 
     /**
-     * Manage query.
-     * @method queryBuilder(Builder $queryBuilder, array $criteria, array $orderBy)
+     * Order data.
+     * @method orderBy(Builder $queryBuilder, array $orderBy)
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $queryBuilder
-     * @param array $criteria
+     * @param \Illuminate\Database\Eloquent\Builder  $queryBuilder
      * @param array $orderBy
      * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    abstract protected function queryBuilder(Builder $queryBuilder, array $criteria = [], array $orderBy = []);
+    public function orderBy(Builder $queryBuilder, array $orderBy)
+    {
+        foreach ($orderBy as $fieldName => $orientation) {
+            $queryBuilder->orderBy($fieldName, $orientation);
+        }
+
+        return $queryBuilder;
+    }
+
+    /**
+     * Create query builder
+     * @method createQueryBuilder(string $fields = '*')
+     * 
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    abstract protected function createQueryBuilder(string $fields = '*');
+
+    /**
+     * Prepare query filters.
+     * @method prepareQueryFilters(Builder $queryBuilder, array $criteria = [])
+     *
+     * @param \Illuminate\Database\Eloquent\Builder  $queryBuilder
+     * @param array $criteria
+     * 
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    abstract protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []);
 }

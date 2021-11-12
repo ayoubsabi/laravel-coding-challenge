@@ -2,22 +2,24 @@
 
 namespace App\Repositories;
 
-use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 
 class CategoryRepository extends BaseRepository
 {
-    public function __construct(Category $category)
+    /**
+     * {@inheritdoc}
+     */
+    protected function createQueryBuilder(string $fields = '*')
     {
-        parent::__construct($category);
+        return $this->select($fields);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function queryBuilder(Builder $queryBuilder, array $criteria = [], array $orderBy = [])
+    protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = [])
     {
-        // customize query
+        // TODO: filter logic
 
         return $queryBuilder;
     }

@@ -2,38 +2,27 @@
 
 namespace App\Repositories;
 
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 
 class ProductRepository extends BaseRepository
 {
-    public function __construct(Product $product)
+    /**
+     * {@inheritdoc}
+     */
+    protected function createQueryBuilder(string $fields = '*')
     {
-        parent::__construct($product);
+        return $this->select($fields);
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function queryBuilder(Builder $queryBuilder, array $criteria = [], array $orderBy = [])
+    protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = [])
     {
-        if(isset($criteria['category_id'])) {
-
-            $queryBuilder->where('category_id', $criteria['category_id']);
-
-        }
-
-        foreach (['name', 'price'] as $field) {
-
-            if(isset($orderBy[$field])) {
-
-                $order = $orderBy[$field];
-
-                $queryBuilder
-                    ->orderBy($field, $order);
-
+        foreach ($criteria as $fieldName => $value) {
+            if (!is_null($value)) {
+                $queryBuilder->where($fieldName, $value);
             }
-
         }
 
         return $queryBuilder;
