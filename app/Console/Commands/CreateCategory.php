@@ -5,10 +5,11 @@ namespace App\Console\Commands;
 use Throwable;
 use Illuminate\Console\Command;
 use App\Repositories\CategoryRepository;
+use App\Services\CategoryService;
 
 class CreateCategory extends Command
 {
-    private $categories;
+    private $categoryService;
 
     /**
      * The name and signature of the console command.
@@ -29,11 +30,11 @@ class CreateCategory extends Command
      *
      * @return void
      */
-    public function __construct(CategoryRepository $categories)
+    public function __construct(CategoryService $categoryService)
     {
         parent::__construct();
 
-        $this->categories = $categories;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -45,7 +46,7 @@ class CreateCategory extends Command
     {        
         try {
 
-            $category = $this->categories->create([
+            $category = $this->categoryService->createCategory([
                 'name' => $this->ask('Enter category name'),
                 'parent_id' => $this->ask('Enter parent ID', null),
             ]);

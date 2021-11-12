@@ -26,7 +26,8 @@ class IndexFormRequest extends FormRequest
         return [
             'category_id' => 'nullable|integer|exists:App\Models\Category,id',
             'created_at' => 'nullable|date',
-            'order_by' => 'nullable|array'
+            'order_by.name' => 'in:asc,desc',
+            'order_by.price' => 'in:asc,desc',
         ];
     }
 }

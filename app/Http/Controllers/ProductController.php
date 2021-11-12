@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Response;
 use App\Services\ProductService;
-use App\Services\Product\IndexService;
-use App\Services\Product\StoreService;
 use App\Http\Requests\Product\IndexFormRequest;
 use App\Http\Requests\Product\StoreFormRequest;
 use App\Http\Requests\Product\UpdateFormRequest;
+use App\Http\Resources\Product\Collection;
+use App\Http\Resources\Product\Resource;
 
 class ProductController extends Controller
 {
+    private $productService;
+
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
@@ -25,7 +28,17 @@ class ProductController extends Controller
      */
     public function index(IndexFormRequest $request)
     {
-        return $this->productService->getProducts($request->validated());
+        $validatedData = $request->validated();
+
+        return $this->successResponse(
+            new Collection(
+                $this->productService->getProducts([
+                        'category_id' => $validatedData['category_id'] ?? null
+                    ],
+                    $validatedData['order_by'] ?? []
+                )
+            )
+        );
     }
 
     /**
@@ -36,7 +49,11 @@ class ProductController extends Controller
      */
     public function store(StoreFormRequest $request)
     {
-        return $this->productService->createProduct($request->validated());
+        return $this->successResponse(new Resource(
+                $this->productService->createProduct($request->validated())
+            ),
+            Response::HTTP_CREATED
+        );
     }
 
     /**
@@ -49,7 +66,13 @@ class ProductController extends Controller
      */
     public function update(Product $product, UpdateFormRequest $request)
     {
-        return $this->productService->updateProduct($product, $request->validated());
+        $this->productService->updateProduct($product, $request->validated());
+
+        return $this->successResponse(new Resource(
+                $this->productService->getProductById($product->id)
+            ),
+            Response::HTTP_CREATED
+        );
     }
 
     /**
@@ -60,6 +83,9 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        return $this->productService->deleteProduct($product);
+        return $this->successResponse(
+            $this->productService->deleteProduct($product),
+            Response::HTTP_NO_CONTENT
+        );
     }
 }

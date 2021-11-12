@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Repositories\ProductRepository;
+use App\Services\ProductService;
 
 class DeleteProduct extends Command
 {
-    private $products;
+    private $productService;
 
     /**
      * The name and signature of the console command.
@@ -28,11 +28,11 @@ class DeleteProduct extends Command
      *
      * @return void
      */
-    public function __construct(ProductRepository $products)
+    public function __construct(ProductService $productService)
     {
         parent::__construct();
 
-        $this->products = $products;
+        $this->productService = $productService;
     }
 
     /**
@@ -42,22 +42,18 @@ class DeleteProduct extends Command
      */
     public function handle()
     {
-        $productId = $this->ask('Enter product ID');
+        $id = $this->ask('Enter product ID');
 
-        if( $product = $this->products->find($productId) ) {
-
-            $product->delete();
+        if ($product = $this->productService->getProductById($id)) {
+            $this->productService->deleteProduct($product);
 
             $this->output->success(
                 sprintf('Product %d deleted successfully', $product->id)
             );
-
         } else {
-
             $this->output->error(
-                sprintf('There is no product with ID = %d', $productId)
+                sprintf('There is no product with ID = %d', $id)
             );
-
         }
 
         return 0;

@@ -6,11 +6,12 @@ use Throwable;
 use Illuminate\Console\Command;
 use App\Repositories\ProductRepository;
 use App\Services\LocalFileUploadService;
+use App\Services\ProductService;
 
 class CreateProduct extends Command
 {
     const IMAGE_PATH = 'public/images';
-    private $products;
+    private $productService;
 
     /**
      * The name and signature of the console command.
@@ -31,11 +32,11 @@ class CreateProduct extends Command
      *
      * @return void
      */
-    public function __construct(ProductRepository $products)
+    public function __construct(ProductService $productService)
     {
         parent::__construct();
 
-        $this->products = $products;
+        $this->productService = $productService;
     }
 
     /**
@@ -49,13 +50,14 @@ class CreateProduct extends Command
 
             $image = file_get_contents($this->ask('Enter product image url'));
 
-            $product = $this->products->create([
-                'name' => $this->ask('Enter product name'),
-                'description' => $this->ask('Enter product description'),
-                'price' => $this->ask('Enter product price'),
-                'image' => $this->handleFileUpload($image)->getFileName(),
-                'category_id' => $this->ask('Enter category ID'),
-            ]);
+            $product = $this->productService->createProduct([
+                    'name' => $this->ask('Enter product name'),
+                    'description' => $this->ask('Enter product description'),
+                    'price' => $this->ask('Enter product price'),
+                    'image' => $this->handleFileUpload($image)->getFileName(),
+                    'category_id' => $this->ask('Enter category ID'),
+                ]
+            );
     
             $this->output->success(
                 sprintf('Product %s created successfully', $product->name)

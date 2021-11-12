@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Repositories\CategoryRepository;
+use App\Services\CategoryService;
 
 class DeleteCategory extends Command
 {
-    private $categories;
+    private $categoryService;
 
     /**
      * The name and signature of the console command.
@@ -28,11 +28,11 @@ class DeleteCategory extends Command
      *
      * @return void
      */
-    public function __construct(CategoryRepository $categories)
+    public function __construct(CategoryService $categoryService)
     {
         parent::__construct();
 
-        $this->categories = $categories;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -42,22 +42,18 @@ class DeleteCategory extends Command
      */
     public function handle()
     {
-        $categoryId = $this->ask('Enter category ID');
+        $id = $this->ask('Enter category ID');
 
-        if( $category = $this->categories->find($categoryId) ) {
-
-            $category->delete();
+        if ($category = $this->categoryService->getCategoryById($id)) {
+            $this->categoryService->deleteCategory($category);
 
             $this->output->success(
                 sprintf('Category %d deleted successfully', $category->id)
             );
-
         } else {
-
             $this->output->error(
-                sprintf('There is no category with ID = %d', $categoryId)
+                sprintf('There is no category with ID = %d', $id)
             );
-
         }
 
         return 0;
