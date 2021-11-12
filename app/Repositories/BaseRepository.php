@@ -11,16 +11,15 @@ abstract class BaseRepository
     protected static $itemPerPage = 10;
 
     /**
-     * @method getAll(array $orderBy = [], bool $pagination = true)
+     * @method getAll(array $orderBy = [])
      * 
      * @param array $orderBy
-     * @param bool $pagination
      * 
      * @return Paginator
      */
-    public function getAll(array $orderBy = [], bool $pagination = true): Paginator
+    public function getAll(array $orderBy = []): Paginator
     {
-        return $this->getBy([], $orderBy, $pagination);
+        return $this->getBy([], $orderBy);
     }
 
     /**
