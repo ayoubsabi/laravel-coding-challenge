@@ -2,26 +2,13 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\Paginator;
 
 abstract class BaseRepository
 {
     protected static $itemPerPage = 10;
-
-    /**
-     * Call predefined model's functions
-     * 
-     * @return mixed
-     */
-    public function __call($name, $arguments)
-    {
-        $model = sprintf(
-            'App\Models\%s',
-            str_replace('Repository', '', class_basename(static::class))
-        );
-
-        return $model::$name(...$arguments);
-    }
 
     /**
      * @method getAll(array $orderBy = [], bool $pagination = true)
@@ -29,9 +16,9 @@ abstract class BaseRepository
      * @param array $orderBy
      * @param bool $pagination
      * 
-     * @return Object[]
+     * @return Paginator
      */
-    public function getAll(array $orderBy = [], bool $pagination = true)
+    public function getAll(array $orderBy = [], bool $pagination = true): Paginator
     {
         return $this->getBy([], $orderBy, $pagination);
     }
@@ -43,9 +30,9 @@ abstract class BaseRepository
      * @param array $orderBy
      * @param bool $pagination
      * 
-     * @return Object[]
+     * @return Paginator
      */
-    public function getBy(array $criteria = [], array $orderBy = [], bool $pagination = true)
+    public function getBy(array $criteria = [], array $orderBy = []): Paginator
     {
         $queryBuilder = $this->prepareQueryFilters(
             $this->createQueryBuilder(),
@@ -57,17 +44,15 @@ abstract class BaseRepository
             $orderBy
         );
 
-        $get = $pagination ? 'paginate' : 'get';
-
-        return $queryBuilder->$get(!$pagination ?: static::$itemPerPage);
+        return $queryBuilder->paginate(static::$itemPerPage);
     }
 
     /**
      * @method getOneBy(array $criteria = [])
      * 
-     * @return Object|null
+     * @return Model|null
      */
-    public function getOneBy(array $criteria = [])
+    public function getOneBy(array $criteria = []): ?Model
     {
         return $this->prepareQueryFilters(
             $this->createQueryBuilder(),
@@ -84,7 +69,7 @@ abstract class BaseRepository
      * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function orderBy(Builder $queryBuilder, array $orderBy)
+    public function orderBy(Builder $queryBuilder, array $orderBy): Builder
     {
         foreach ($orderBy as $fieldName => $orientation) {
             $queryBuilder->orderBy($fieldName, $orientation);
@@ -97,9 +82,11 @@ abstract class BaseRepository
      * Create query builder
      * @method createQueryBuilder(string $fields = '*')
      * 
+     * @param string $fields
+     * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    abstract protected function createQueryBuilder(string $fields = '*');
+    abstract protected function createQueryBuilder(string $fields = '*'): Builder;
 
     /**
      * Prepare query filters.
@@ -110,5 +97,5 @@ abstract class BaseRepository
      * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    abstract protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []);
+    abstract protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []): Builder;
 }

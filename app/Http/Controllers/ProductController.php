@@ -66,10 +66,8 @@ class ProductController extends Controller
      */
     public function update(Product $product, UpdateFormRequest $request)
     {
-        $this->productService->updateProduct($product, $request->validated());
-
         return $this->successResponse(new Resource(
-                $this->productService->getProductById($product->id)
+                $this->productService->updateProduct($product, $request->validated())
             ),
             Response::HTTP_CREATED
         );

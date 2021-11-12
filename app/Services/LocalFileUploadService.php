@@ -20,7 +20,7 @@ class LocalFileUploadService
      * 
      * @return self
      */
-    public function save(string $path)
+    public function save(string $path): self
     {
         $this->file->storeAs($path, $this->generateFileName());
 
@@ -32,7 +32,7 @@ class LocalFileUploadService
      * 
      * @return string
      */
-    protected function generateFileName()
+    protected function generateFileName(): string
     {
         return $this->fileName = $this->file->hashName();
     }
@@ -42,7 +42,7 @@ class LocalFileUploadService
      * 
      * @return string
      */
-    public function getFileName()
+    public function getFileName(): string
     {
         return $this->fileName;
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Repositories\ProductRepository;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class ProductService
 {
@@ -20,9 +21,9 @@ class ProductService
      *
      * @param  array  $criteria
      * 
-     * @return Product[]
+     * @return Paginator
      */
-    public function getProducts(array $criteria, array $orderBy)
+    public function getProducts(array $criteria, array $orderBy): Paginator
     {
         return $this->products->getBy($criteria, $orderBy);
     }
@@ -32,11 +33,11 @@ class ProductService
      *
      * @param  int $id
      * 
-     * @return Product
+     * @return Product|null
      */
-    public function getProductById(int $id)
+    public function getProductById(int $id): ?Product
     {
-        return $this->products->find($id);
+        return $this->products->getOneBy(['id' => $id]);
     }
 
     /**
@@ -46,7 +47,7 @@ class ProductService
      * 
      * @return Product
      */
-    public function createProduct(array $data)
+    public function createProduct(array $data): Product
     {
         return $this->products->create(
             array_merge($data, [
@@ -65,11 +66,11 @@ class ProductService
      * @param  Product $product
      * @param  array  $data
      * 
-     * @return bool
+     * @return Product
      */
-    public function updateProduct(Product $product, array $data)
+    public function updateProduct(Product $product, array $data): Product
     {
-        return $product->update($data);
+        return $this->products->update($product, $data);
     }
 
     /**
@@ -79,8 +80,8 @@ class ProductService
      * 
      * @return bool|null
      */
-    public function deleteProduct(Product $product)
+    public function deleteProduct(Product $product): ?bool
     {
-        return $product->delete();
+        return $this->products->delete($product);
     }
 }

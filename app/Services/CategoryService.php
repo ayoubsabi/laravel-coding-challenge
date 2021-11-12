@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Repositories\CategoryRepository;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class CategoryService
 {
@@ -19,9 +20,9 @@ class CategoryService
      *
      * @param  array  $criteria
      * 
-     * @return Category[]
+     * @return Paginator
      */
-    public function getCategories(array $criteria, array $orderBy)
+    public function getCategories(array $criteria, array $orderBy): Paginator
     {
         return $this->categories->getBy($criteria, $orderBy);
     }
@@ -31,11 +32,11 @@ class CategoryService
      *
      * @param  int $id
      * 
-     * @return Category
+     * @return Category|null
      */
-    public function getCategoryById(int $id)
+    public function getCategoryById(int $id): ?Category
     {
-        return $this->categories->find($id);
+        return $this->categories->getOneBy(['id' => $id]);
     }
 
     /**
@@ -45,7 +46,7 @@ class CategoryService
      * 
      * @return Category
      */
-    public function createCategory(array $data)
+    public function createCategory(array $data): Category
     {
         return $this->categories->create($data);
     }
@@ -56,11 +57,11 @@ class CategoryService
      * @param  Category $category
      * @param  array  $data
      * 
-     * @return bool
+     * @return Category
      */
-    public function updateCategory(Category $category, array $data)
+    public function updateCategory(Category $category, array $data): Category
     {
-        return $category->update($data);
+        return $this->categories->update($category, $data);
     }
 
     /**
@@ -70,8 +71,8 @@ class CategoryService
      * 
      * @return bool|null
      */
-    public function deleteCategory(Category $category)
+    public function deleteCategory(Category $category): ?bool
     {
-        return $category->delete();
+        return $this->categories->delete($category);
     }
 }
