@@ -17,10 +17,7 @@ class Resource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'parent' => $this->parent ? [
-                'id' => $this->parent->id,
-                'name' => $this->parent->name,
-            ] : null
+            'parent' => new self($this->whenLoaded('parent'))
         ];
     }
 }

@@ -58,7 +58,7 @@ class ProductRepository extends BaseRepository
      */
     protected function createQueryBuilder(string $fields = '*'): Builder
     {
-        return Product::select($fields);
+        return Product::select($fields)->with('category');
     }
 
     /**
