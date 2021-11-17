@@ -92,7 +92,7 @@ abstract class BaseRepository
      */
     protected function checkIfFieldsExists(array $inputFields, array $tableFields): bool
     {
-        if (! empty($criteria) && $nonExistentFields = array_diff($inputFields, $tableFields)) {
+        if (! empty($inputFields) && $nonExistentFields = array_diff($inputFields, $tableFields)) {
             throw new Exception(sprintf("These fields {%s} are not exists in the table", implode(', ', $nonExistentFields)));
         }
 
