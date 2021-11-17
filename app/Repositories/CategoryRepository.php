@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Category;
+use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 
@@ -15,49 +16,57 @@ class CategoryRepository extends BaseRepository
     /**
      * {@inheritdoc}
      */
-    protected function createQueryBuilder(string $fields = '*'): Builder
+    protected function queryBuilder(string $fields = '*'): Builder
     {
-        return Category::select($fields);
-    }
+        if (! $this->queryBuilder) {
+            $this->queryBuilder = Category::query();
+        }
 
-    /**
-     * @method getOneBy(array $criteria = [])
-     * 
-     * @return Category|null
-     */
-    public function getOneBy(array $criteria = []): ?Category
-    {
-        $this->checkIfFieldsExists(array_keys($criteria), self::CATEGORY_FIELDS);
-
-        return $this->defaultQueryFilters(
-            $this->createQueryBuilder()->with('category'),
-            $criteria
-        )->first();
+        return $this->queryBuilder;
     }
 
     /**
      * {@inheritdoc}
+     * 
+     * @return Category
      */
-    public function getBy(array $criteria = [], array $orderBy = []): Paginator
+    public function findOneBy(array $criteria = [], array $columns = ['*']): ?Category
     {
-        $this->checkIfFieldsExists(array_merge(
+        $this->checkIfColumnsExists(array_keys($criteria), self::CATEGORY_FIELDS);
+
+        return $this
+            ->queryBuilder()
+            ->where(function ($query) use ($criteria) {
+                foreach ($criteria as $column => $value) {
+                    $query->where($column, $value);
+                }
+            })
+            ->first($columns);
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function findBy(array $criteria = [], array $orderBy = [], int $itemPerPage = 10, array $columns = ['*']): Paginator
+    {
+        $this->checkIfColumnsExists(array_merge(
                 array_keys($criteria),
-                array_keys($orderBy)
+                Arr::only($orderBy, 'column')
             ),
             self::CATEGORY_FIELDS
         );
 
-        $queryBuilder = $this->defaultQueryFilters(
-            $this->createQueryBuilder(),
-            $criteria
-        );
-
-        $queryBuilder = $this->orderBy(
-            $queryBuilder,
-            $orderBy
-        );
-
-        return $queryBuilder->paginate(static::$itemPerPage);
+        return $this
+            ->queryBuilder()
+            ->where(function ($query) use ($criteria) {
+                foreach ($criteria as $column => $value) {
+                    $query->where($column, $value);
+                }
+            })
+            ->orderBy(
+                Arr::get($orderBy, 'column', 'created_at'),
+                Arr::get($orderBy, 'orientation', 'desc')
+            )
+            ->paginate($itemPerPage, $columns);
     }
 
     /**

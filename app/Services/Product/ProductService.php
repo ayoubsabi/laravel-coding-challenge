@@ -22,9 +22,10 @@ class ProductService
     }
 
     /**
-     * Get products.
+     * @method getProducts(array $criteria, array $orderBy)
      *
-     * @param  array  $criteria
+     * @param array $criteria
+     * @param array $orderBy
      * 
      * @return Paginator
      */
@@ -35,29 +36,29 @@ class ProductService
         ]);
 
         $orderBy = $this->validatorService->validated($orderBy, [
-            'name' => 'in:asc,desc',
-            'price' => 'in:asc,desc'
+            'column' => 'string',
+            'orientation' => 'in:asc,desc'
         ]);
 
-        return $this->productRepository->getBy($criteria, $orderBy);
+        return $this->productRepository->findBy($criteria, $orderBy);
     }
 
     /**
-     * Get product by id.
+     * @method getProductById(int $id)
      *
-     * @param  int $id
+     * @param int $id
      * 
      * @return Product|null
      */
     public function getProductById(int $id): ?Product
     {
-        return $this->productRepository->getOneBy(['id' => $id]);
+        return $this->productRepository->findOneBy(['id' => $id]);
     }
 
     /**
-     * Create product.
+     * @method createProduct(array $data)
      *
-     * @param  array  $data
+     * @param array $data
      * 
      * @return Product
      */
@@ -83,10 +84,10 @@ class ProductService
     }
 
     /**
-     * Update product.
+     * @method updateProduct(Product $product, array $data)
      *
-     * @param  Product $product
-     * @param  array  $data
+     * @param Product $product
+     * @param array $data
      * 
      * @return Product
      */
@@ -112,17 +113,17 @@ class ProductService
             throw new Exception("Product update failure");
         }
 
-        return $this->productRepository->getOneBy(['id' => $product]);
+        return $this->productRepository->findOneBy(['id' => $product]);
     }
 
     /**
-     * Delete product.
+     * @method deleteProduct(Product $product)
      *
-     * @param  Product $product
+     * @param Product $product
      * 
-     * @return bool
+     * @return void
      */
-    public function deleteProduct(Product $product): bool
+    public function deleteProduct(Product $product): void
     {
         if (! $this->localFileUploadService->delete(sprintf("%s/%s", self::IMAGE_PATH, $product->image))) {
             throw new Exception("File delete failure");
@@ -131,7 +132,5 @@ class ProductService
         if (! $this->productRepository->delete($product)) {
             throw new Exception("Product delete failure");
         }
-
-        return true;
     }
 }

@@ -19,9 +19,10 @@ class CategoryService
     }
 
     /**
-     * Get categories.
+     * @method getCategories(array $criteria, array $orderBy)
      *
-     * @param  array  $criteria
+     * @param array $criteria
+     * @param array $orderBy
      * 
      * @return Paginator
      */
@@ -36,25 +37,25 @@ class CategoryService
             'created_at' => 'in:asc,desc'
         ]);
 
-        return $this->categoryRepository->getBy($criteria, $orderBy);
+        return $this->categoryRepository->findBy($criteria, $orderBy);
     }
 
     /**
-     * Get category by id.
+     * @method getCategoryById(int $id)
      *
-     * @param  int $id
+     * @param int $id
      * 
      * @return Category|null
      */
     public function getCategoryById(int $id): ?Category
     {
-        return $this->categoryRepository->getOneBy(['id' => $id]);
+        return $this->categoryRepository->findOneBy(['id' => $id]);
     }
 
     /**
-     * Create category.
+     * @method createCategory(array $data)
      *
-     * @param  array  $data
+     * @param array $data
      * 
      * @return Category
      */
@@ -69,10 +70,10 @@ class CategoryService
     }
 
     /**
-     * Update category.
+     * @method updateCategory(Category $category, array $data)
      *
-     * @param  Category $category
-     * @param  array  $data
+     * @param Category $category
+     * @param array $data
      * 
      * @return Category
      */
@@ -87,18 +88,20 @@ class CategoryService
             throw new Exception("Category update failure");
         }
 
-        return $this->categoryRepository->getOneBy(['id' => $category->id]);
+        return $this->categoryRepository->findOneBy(['id' => $category->id]);
     }
 
     /**
-     * Delete category.
+     * @method deleteCategory(Category $category)
      *
      * @param  Category $category
      * 
-     * @return bool|null
+     * @return void
      */
-    public function deleteCategory(Category $category): ?bool
+    public function deleteCategory(Category $category): void
     {
-        return $this->categoryRepository->delete($category);
+        if (! $this->categoryRepository->delete($category)) {
+            throw new Exception("Category delete failure");
+        }
     }
 }

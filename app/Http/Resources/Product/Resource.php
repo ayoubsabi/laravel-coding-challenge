@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Product;
 
 use App\Http\Resources\Category\Resource as CategoryResource;
+use App\Models\Category;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class Resource extends JsonResource
@@ -22,7 +23,7 @@ class Resource extends JsonResource
             'price' => $this->price,
             'image' => sprintf('/storage/images/%s', $this->image),
             'created_at' => $this->created_at,
-            'category' => new CategoryResource($this->category)
+            'category' => new CategoryResource($this->whenLoaded('category'))
         ];
     }
 }
