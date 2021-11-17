@@ -73,27 +73,27 @@ class CategoryRepository extends BaseRepository
     }
 
     /**
-     * @method update(Category $object, array $data)
+     * @method update(Category $category, array $data)
      * 
-     * @param Category $object
+     * @param Category $category
      * @param array $data
      * 
      * @return bool
      */
-    public function update(Category $object, array $data): bool
+    public function update(Category $category, array $data): bool
     {
-        return $object->update($data);
+        return $category->update($data);
     }
 
     /**
-     * @method delete(Category $object)
+     * @method delete(Category $category)
      * 
-     * @param Category $object
+     * @param Category $category
      * 
-     * @return bool|null
+     * @return bool
      */
-    public function delete(Category $object): ?bool
+    public function delete(Category $category): bool
     {
-        return $object->delete();
+        return $category->delete();
     }
 }
