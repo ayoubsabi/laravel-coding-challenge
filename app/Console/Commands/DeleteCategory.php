@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\CategoryService;
+use App\Services\Category\CategoryService;
 
 class DeleteCategory extends Command
 {

@@ -2,13 +2,34 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Model;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 
 abstract class BaseRepository
 {
     protected static $itemPerPage = 10;
+
+    /**
+     * Create query builder
+     * @method createQueryBuilder(string $fields = '*')
+     * 
+     * @param string $fields
+     * 
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    abstract protected function createQueryBuilder(string $fields = '*'): Builder;
+
+    /**
+     * @method getBy(array $criteria = [], array $orderBy = [], bool $pagination = true)
+     * 
+     * @param array $criteria
+     * @param array $orderBy
+     * @param bool $pagination
+     * 
+     * @return Paginator
+     */
+    abstract public function getBy(array $criteria = [], array $orderBy = []): Paginator;
 
     /**
      * @method getAll(array $orderBy = [])
@@ -23,44 +44,25 @@ abstract class BaseRepository
     }
 
     /**
-     * @method getBy(array $criteria = [], array $orderBy = [], bool $pagination = true)
-     * 
+     * Prepare query filters.
+     * @method prepareQueryFilters(Builder $queryBuilder, array $criteria = [])
+     *
+     * @param \Illuminate\Database\Eloquent\Builder  $queryBuilder
      * @param array $criteria
-     * @param array $orderBy
-     * @param bool $pagination
      * 
-     * @return Paginator
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getBy(array $criteria = [], array $orderBy = []): Paginator
+    protected function defaultQueryFilters(Builder $queryBuilder, array $criteria = []): Builder
     {
-        $queryBuilder = $this->prepareQueryFilters(
-            $this->createQueryBuilder(),
-            $criteria
-        );
+        foreach ($criteria as $fieldName => $value) {
+            $queryBuilder->where($fieldName, $value);
+        }
 
-        $queryBuilder = $this->orderBy(
-            $queryBuilder,
-            $orderBy
-        );
-
-        return $queryBuilder->paginate(static::$itemPerPage);
+        return $queryBuilder;
     }
 
     /**
-     * @method getOneBy(array $criteria = [])
-     * 
-     * @return Model|null
-     */
-    public function getOneBy(array $criteria = []): ?Model
-    {
-        return $this->prepareQueryFilters(
-            $this->createQueryBuilder(),
-            $criteria
-        )->first();
-    }
-
-    /**
-     * Order data.
+     * Order by query.
      * @method orderBy(Builder $queryBuilder, array $orderBy)
      *
      * @param \Illuminate\Database\Eloquent\Builder  $queryBuilder
@@ -78,23 +80,22 @@ abstract class BaseRepository
     }
 
     /**
-     * Create query builder
-     * @method createQueryBuilder(string $fields = '*')
-     * 
-     * @param string $fields
-     * 
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    abstract protected function createQueryBuilder(string $fields = '*'): Builder;
-
-    /**
-     * Prepare query filters.
-     * @method prepareQueryFilters(Builder $queryBuilder, array $criteria = [])
+     * Check if fields exists in the table.
+     * @method checkIfFieldsExists(array $inputFields, array $tableFields)
      *
-     * @param \Illuminate\Database\Eloquent\Builder  $queryBuilder
-     * @param array $criteria
+     * @param array $inputFields
+     * @param array $tableFields
      * 
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return true
+     * 
+     * @throws \Exception
      */
-    abstract protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []): Builder;
+    protected function checkIfFieldsExists(array $inputFields, array $tableFields): bool
+    {
+        if (! empty($criteria) && $nonExistentFields = array_diff($inputFields, $tableFields)) {
+            throw new Exception(sprintf("These fields {%s} are not exists in the table", implode(', ', $nonExistentFields)));
+        }
+
+        return true;
+    }
 }

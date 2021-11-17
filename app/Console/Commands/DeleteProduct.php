@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\ProductService;
+use App\Services\Product\ProductService;
 
 class DeleteProduct extends Command
 {

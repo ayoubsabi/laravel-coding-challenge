@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Throwable;
 use Illuminate\Console\Command;
-use App\Repositories\CategoryRepository;
-use App\Services\CategoryService;
+use App\Services\Category\CategoryService;
 
 class CreateCategory extends Command
 {

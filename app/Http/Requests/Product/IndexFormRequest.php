@@ -24,7 +24,7 @@ class IndexFormRequest extends FormRequest
     public function rules()
     {
         return [
-            'category_id' => 'nullable|integer|exists:App\Models\Category,id',
+            'category_id' => 'integer|exists:App\Models\Category,id',
             'created_at' => 'nullable|date',
             'order_by.name' => 'in:asc,desc',
             'order_by.price' => 'in:asc,desc',

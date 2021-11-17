@@ -6,9 +6,62 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class ProductRepository extends BaseRepository
 {
+    const PRODUCT_FIELDS = [
+        'id', 'category_id', 'name', 'image', 'price', 'description', 'created_at', 'updated_at'
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createQueryBuilder(string $fields = '*'): Builder
+    {
+        return Product::select($fields);
+    }
+
+    /**
+     * @method getOneBy(array $criteria = [])
+     * 
+     * @return Product|null
+     */
+    public function getOneBy(array $criteria = []): ?Product
+    {
+        $this->checkIfFieldsExists(array_keys($criteria), self::PRODUCT_FIELDS);
+
+        return $this->defaultQueryFilters(
+            $this->createQueryBuilder()->with('category'),
+            $criteria
+        )->first();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBy(array $criteria = [], array $orderBy = []): Paginator
+    {
+        $this->checkIfFieldsExists(array_merge(
+                array_keys($criteria),
+                array_keys($orderBy)
+            ),
+            self::PRODUCT_FIELDS
+        );
+
+        $queryBuilder = $this->defaultQueryFilters(
+            $this->createQueryBuilder()->with('category'),
+            $criteria
+        );
+
+        $queryBuilder = $this->orderBy(
+            $queryBuilder,
+            $orderBy
+        );
+
+        return $queryBuilder->paginate(static::$itemPerPage);
+    }
+
     /**
      * @method create(array $data, Category $category = null)
      * 
@@ -27,51 +80,27 @@ class ProductRepository extends BaseRepository
     }
 
     /**
-     * @method update(Product $object, array $data)
+     * @method update(Product $product, array $data)
      * 
-     * @param Product $object
+     * @param Product $product
      * @param array $data
      * 
-     * @return Product
+     * @return bool
      */
-    public function update(Product $object, array $data): Product
+    public function update(Product $product, array $data): bool
     {
-        $object->update($data);
-
-        return $this->getOneBy(['id' => $object->id]);
+        return $product->update($data);
     }
 
     /**
-     * @method delete(Model $object)
+     * @method delete(Model $product)
      * 
-     * @param Product $object
+     * @param Product $product
      * 
-     * @return bool|null
+     * @return bool
      */
-    public function delete(Product $object): ?bool
+    public function delete(Product $product): bool
     {
-        return $object->delete();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function createQueryBuilder(string $fields = '*'): Builder
-    {
-        return Product::select($fields)->with('category');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []): Builder
-    {
-        foreach ($criteria as $fieldName => $value) {
-            if (!is_null($value)) {
-                $queryBuilder->where($fieldName, $value);
-            }
-        }
-
-        return $queryBuilder;
+        return $product->delete();
     }
 }

@@ -3,17 +3,69 @@
 namespace App\Repositories;
 
 use App\Models\Category;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class CategoryRepository extends BaseRepository
 {
+    const CATEGORY_FIELDS = [
+        'id', 'parent_id', 'name', 'created_at', 'updated_at'
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createQueryBuilder(string $fields = '*'): Builder
+    {
+        return Category::select($fields);
+    }
+
+    /**
+     * @method getOneBy(array $criteria = [])
+     * 
+     * @return Category|null
+     */
+    public function getOneBy(array $criteria = []): ?Category
+    {
+        $this->checkIfFieldsExists(array_keys($criteria), self::CATEGORY_FIELDS);
+
+        return $this->defaultQueryFilters(
+            $this->createQueryBuilder()->with('category'),
+            $criteria
+        )->first();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBy(array $criteria = [], array $orderBy = []): Paginator
+    {
+        $this->checkIfFieldsExists(array_merge(
+                array_keys($criteria),
+                array_keys($orderBy)
+            ),
+            self::CATEGORY_FIELDS
+        );
+
+        $queryBuilder = $this->defaultQueryFilters(
+            $this->createQueryBuilder(),
+            $criteria
+        );
+
+        $queryBuilder = $this->orderBy(
+            $queryBuilder,
+            $orderBy
+        );
+
+        return $queryBuilder->paginate(static::$itemPerPage);
+    }
+
     /**
      * @method create(array $data)
      * 
      * @param array $data
      * 
-     * @return Model
+     * @return Category
      */
     public function create(array $data): Category
     {
@@ -26,13 +78,11 @@ class CategoryRepository extends BaseRepository
      * @param Category $object
      * @param array $data
      * 
-     * @return Category
+     * @return bool
      */
-    public function update(Category $object, array $data): Category
+    public function update(Category $object, array $data): bool
     {
-        $object->update($data);
-
-        return $this->getOneBy(['id' => $object->id]);
+        return $object->update($data);
     }
 
     /**
@@ -45,23 +95,5 @@ class CategoryRepository extends BaseRepository
     public function delete(Category $object): ?bool
     {
         return $object->delete();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function createQueryBuilder(string $fields = '*'): Builder
-    {
-        return Category::select($fields);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function prepareQueryFilters(Builder $queryBuilder, array $criteria = []): Builder
-    {
-        // TODO: filter logic
-
-        return $queryBuilder;
     }
 }

@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Services\ProductService;
-use App\Http\Requests\Product\IndexFormRequest;
-use App\Http\Requests\Product\StoreFormRequest;
-use App\Http\Requests\Product\UpdateFormRequest;
-use App\Http\Resources\Product\Collection;
 use App\Http\Resources\Product\Resource;
+use App\Services\Product\ProductService;
+use App\Http\Resources\Product\Collection;
 
 class ProductController extends Controller
 {
@@ -23,19 +21,16 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  \App\Http\Requests\Product\IndexFormRequest  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(IndexFormRequest $request)
+    public function index(Request $request)
     {
-        $validatedData = $request->validated();
-
-        return $this->successResponse(
+        return $this->showAll(
             new Collection(
-                $this->productService->getProducts([
-                        'category_id' => $validatedData['category_id'] ?? null
-                    ],
-                    $validatedData['order_by'] ?? []
+                $this->productService->getProducts(
+                    $request->except(['order_by']),
+                    $request->get('order_by', [])
                 )
             )
         );
@@ -44,13 +39,13 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\Product\StoreFormRequest $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreFormRequest $request)
+    public function store(Request $request)
     {
-        return $this->successResponse(new Resource(
-                $this->productService->createProduct($request->validated())
+        return $this->showOne(new Resource(
+                $this->productService->createProduct($request->all())
             ),
             Response::HTTP_CREATED
         );
@@ -60,14 +55,14 @@ class ProductController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Product  $product
-     * @param  \App\Http\Requests\Product\UpdateFormRequest $request
+     * @param  \Illuminate\Http\Request  $request
      * 
      * @return \Illuminate\Http\Response
      */
-    public function update(Product $product, UpdateFormRequest $request)
+    public function update(Product $product, Request $request)
     {
-        return $this->successResponse(new Resource(
-                $this->productService->updateProduct($product, $request->validated())
+        return $this->showOne(new Resource(
+                $this->productService->updateProduct($product, $request->all())
             ),
             Response::HTTP_CREATED
         );
@@ -81,9 +76,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        return $this->successResponse(
-            $this->productService->deleteProduct($product),
-            Response::HTTP_NO_CONTENT
-        );
+        $this->productService->deleteProduct($product);
+
+        return $this->noContentResponse();
     }
 }
