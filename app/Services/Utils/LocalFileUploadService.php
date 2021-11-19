@@ -2,49 +2,50 @@
 
 namespace App\Services\Utils;
 
+use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class LocalFileUploadService
 {
     /**
-     * Save file to a giving path.
+     * @method save(UploadedFile $file, string $path)
      *
-     * @param  string $path
+     * @param UploadedFile $file
+     * @param string $path
      * 
-     * @return string|false
+     * @return string
      */
-    public function save(UploadedFile $file, string $path): ?string
+    public function save(UploadedFile $file, string $path): string
     {
-        if (!$file->storeAs( $path, $fileName = $this->generateFileName($file))) {
-            return false;
-        }
+        throw_if(
+            ! $file->storeAs( $path, $fileName = $this->generateFileName($file)),
+            new Exception("File upload failure")
+        );
 
         return $fileName;
     }
 
     /**
-     * Update file.
+     * @method update(string $currentFileName, UploadedFile $file, string $path)
      *
-     * @param  string $path
+     * @param string $currentFileName
+     * @param UploadedFile $file
+     * @param string $path
      * 
-     * @return string|false
+     * @return string
      */
-    public function update(UploadedFile $file, string $path, string $currentFileName): ?string
+    public function update(string $currentFileName, UploadedFile $file, string $path): string
     {
         $this->delete(sprintf('%s/%s', $path, $currentFileName));
-        
-        if (! $file->storeAs( $path, $newFileName = $this->generateFileName($file))) {
-            return false;
-        }
 
-        return $newFileName;
+        return $this->save($file, $path);
     }
 
     /**
-     * Delete the file at a given path.
+     * @method delete(string $filePath)
      *
-     * @param  string $filePath
+     * @param string $filePath
      * 
      * @return bool
      */
@@ -55,6 +56,7 @@ class LocalFileUploadService
 
     /**
      * Generate file name.
+     * @method generateFileName(UploadedFile $file)
      * 
      * @return string
      */

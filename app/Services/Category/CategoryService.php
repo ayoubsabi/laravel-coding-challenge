@@ -10,7 +10,8 @@ use Illuminate\Contracts\Pagination\Paginator;
 
 class CategoryService
 {
-    private $categoryRepository, $validatorService;
+    private $categoryRepository;
+    private $validatorService;
 
     public function __construct(CategoryRepository $categoryRepository, ValidatorService $validatorService)
     {
@@ -84,9 +85,10 @@ class CategoryService
             'parent_id' => 'integer|exists:App\Models\Category,id'
         ]);
 
-        if (! $this->categoryRepository->update($category, $data)) {
-            throw new Exception("Category update failure");
-        }
+        throw_if(
+            ! $this->categoryRepository->update($category, $data),
+            new Exception("Category update failure")
+        );
 
         return $this->categoryRepository->findOneBy(['id' => $category->id]);
     }
@@ -94,14 +96,15 @@ class CategoryService
     /**
      * @method deleteCategory(Category $category)
      *
-     * @param  Category $category
+     * @param Category $category
      * 
      * @return void
      */
     public function deleteCategory(Category $category): void
     {
-        if (! $this->categoryRepository->delete($category)) {
-            throw new Exception("Category delete failure");
-        }
+        throw_if(
+            ! $this->categoryRepository->delete($category),
+            new Exception("Category delete failure")
+        );
     }
 }

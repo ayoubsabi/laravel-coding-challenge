@@ -16,13 +16,9 @@ class CategoryRepository extends BaseRepository
     /**
      * {@inheritdoc}
      */
-    protected function queryBuilder(string $fields = '*'): Builder
+    protected function queryBuilder(): Builder
     {
-        if (! $this->queryBuilder) {
-            $this->queryBuilder = Category::query();
-        }
-
-        return $this->queryBuilder;
+        return Category::query();
     }
 
     /**

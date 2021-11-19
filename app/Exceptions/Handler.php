@@ -5,12 +5,9 @@ namespace App\Exceptions;
 use Throwable;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -59,35 +56,19 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        // if (! $request->expectsJson()) {
-        //     return parent::render($request, $exception);
-        // }
+        if (! $request->expectsJson()) {
+            return parent::render($request, $exception);
+        }
 
         if ($exception instanceof ValidationException) {
             return $this->convertValidationExceptionToResponse($exception, $request);
         }
 
-        if ($exception instanceof ModelNotFoundException) {
-            return $this->errorResponse($exception->getMessage(), Response::HTTP_NOT_FOUND);
-        } 
-
-        if ($exception instanceof NotFoundHttpException) {
-            return $this->errorResponse('URL Not Found.', Response::HTTP_NOT_FOUND);
-        }
-
-        if ($exception instanceof MethodNotAllowedHttpException) {
-            return $this->errorResponse($exception->getMessage(), Response::HTTP_METHOD_NOT_ALLOWED);
-        }
-
-        if ($exception instanceof HttpException) {
-            return $this->errorResponse($exception->getMessage(), $exception->getCode());
-        }
-
-        return $this->errorResponse($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->errorResponse($exception->getMessage(), $exception->getCode());
         
     }
     
-    protected function convertValidationExceptionToResponse(ValidationException $exception, $request)
+    protected function convertValidationExceptionToResponse(ValidationException $exception, $request): JsonResponse
     {
         return $this->errorResponse($exception->validator->errors()->getMessages(), Response::HTTP_UNPROCESSABLE_ENTITY);
     }

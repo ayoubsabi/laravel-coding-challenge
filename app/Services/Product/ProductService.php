@@ -12,13 +12,16 @@ use Illuminate\Contracts\Pagination\Paginator;
 class ProductService
 {
     const IMAGE_PATH = 'public/images';
-    private $productRepository, $validatorService, $localFileUploadService;
+
+    private $productRepository;
+    private $validatorService;
+    private $localFileUploadService;
 
     public function __construct(ProductRepository $productRepository, ValidatorService $validatorService, LocalFileUploadService $localFileUploadService)
     {
         $this->productRepository = $productRepository;
-        $this->localFileUploadService = $localFileUploadService;
         $this->validatorService = $validatorService;
+        $this->localFileUploadService = $localFileUploadService;
     }
 
     /**
@@ -72,13 +75,9 @@ class ProductService
             'category_id' => 'required|integer|exists:App\Models\Category,id'
         ]);
 
-        if (! $filename = $this->localFileUploadService->save($data['image'], self::IMAGE_PATH)) {
-            throw new Exception("File upload failure");
-        }
-
         return $this->productRepository->create(
             array_merge($data, [
-                'image' => $filename
+                'image' => $this->localFileUploadService->save($data['image'], self::IMAGE_PATH)
             ])
         );
     }
@@ -102,16 +101,13 @@ class ProductService
         ]);
 
         if (isset($data['image'])) {
-            if (! $filename = $this->localFileUploadService->update($data['image'], self::IMAGE_PATH, $product->image)) {
-                throw new Exception("File upload failure");
-            }
-
-            $data['image'] = $filename;
+            $data['image'] = $this->localFileUploadService->update($product->image, $data['image'], self::IMAGE_PATH);
         }
 
-        if (! $this->productRepository->update($product, $data)) {
-            throw new Exception("Product update failure");
-        }
+        throw_if(
+            ! $this->productRepository->update($product, $data),
+            new Exception("Product update failure")
+        );
 
         return $this->productRepository->findOneBy(['id' => $product]);
     }
@@ -125,12 +121,11 @@ class ProductService
      */
     public function deleteProduct(Product $product): void
     {
-        if (! $this->localFileUploadService->delete(sprintf("%s/%s", self::IMAGE_PATH, $product->image))) {
-            throw new Exception("File delete failure");
-        }
+        throw_if(
+            ! $this->productRepository->delete($product),
+            new Exception("Product delete failure")
+        );
 
-        if (! $this->productRepository->delete($product)) {
-            throw new Exception("Product delete failure");
-        }
+        $this->localFileUploadService->delete(sprintf("%s/%s", self::IMAGE_PATH, $product->image));
     }
 }

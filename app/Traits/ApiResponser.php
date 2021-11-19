@@ -13,10 +13,10 @@ trait ApiResponser
     /**
      * @method response(array $data = [], int $code = Response::HTTP_OK)
      *
-     * @param  ResourceCollection|JsonResource|array $data
-     * @param  int $code
+     * @param ResourceCollection|JsonResource|array $data
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     private function response($data = [], int $code = Response::HTTP_OK): JsonResponse
     {
@@ -26,10 +26,10 @@ trait ApiResponser
     /**
      * @method successResponse($data = [], $code = Response::HTTP_OK)
      *
-     * @param  array $data
-     * @param  int $code
+     * @param array $data
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     protected function successResponse(array $data = [], int $code = Response::HTTP_OK): JsonResponse
     {
@@ -43,9 +43,9 @@ trait ApiResponser
     /**
      * @method noContentResponse(int $code = Response::HTTP_NO_CONTENT)
      *
-     * @param  int $code
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     protected function noContentResponse(int $code = Response::HTTP_NO_CONTENT): JsonResponse
     {
@@ -55,10 +55,10 @@ trait ApiResponser
     /**
      * @method errorResponse(string $message, int $code = Response::HTTP_INTERNAL_SERVER_ERROR)
      *
-     * @param  string|array $message
-     * @param  int $code
+     * @param string|array $message
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     protected function errorResponse($messages, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
     {
@@ -73,10 +73,10 @@ trait ApiResponser
     /**
      * @method showAll(ResourceCollection $collection, int $code = Response::HTTP_OK)
      *
-     * @param  ResourceCollection $collection
-     * @param  int $code
+     * @param ResourceCollection $collection
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     protected function showAll(ResourceCollection $collection, int $code = Response::HTTP_OK): JsonResponse
     {
@@ -89,10 +89,10 @@ trait ApiResponser
     /**
      * @method showOne(JsonResource $resource, int $code = Response::HTTP_OK)
      *
-     * @param  JsonResource $resource
-     * @param  int $code
+     * @param JsonResource $resource
+     * @param int $code
      * 
-     * @return string|false
+     * @return JsonResponse
      */
     protected function showOne(JsonResource $resource, int $code = Response::HTTP_OK): JsonResponse
     {

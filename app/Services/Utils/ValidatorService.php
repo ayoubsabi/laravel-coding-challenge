@@ -7,10 +7,9 @@ use Illuminate\Support\Facades\Validator;
 class ValidatorService
 {
     /**
-     * Validate user inputs.
+     * @method validated(array $data, array $rules)
      *
-     * @param array  $data
-     * 
+     * @param array $data
      * @param array $rules
      * 
      * @return array

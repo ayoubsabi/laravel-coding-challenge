@@ -7,7 +7,7 @@ use Exception;
 trait TableColumnsChecker
 {
     /**
-     * Check if fields exists in the table.
+     * Check if columns exists in the table.
      * @method checkIfColumnsExists(array $inputColumns, array $tableColumns)
      *
      * @param array $inputColumns
@@ -19,9 +19,10 @@ trait TableColumnsChecker
      */
     protected function checkIfColumnsExists(array $inputColumns, array $tableColumns): bool
     {
-        if (! empty($inputColumns) && $nonExistentColumns = array_diff($inputColumns, $tableColumns)) {
-            throw new Exception(sprintf("These columns {%s} are not exists in the table", implode(', ', $nonExistentColumns)));
-        }
+        throw_if(
+            ! empty($inputColumns) && $nonExistentColumns = array_diff($inputColumns, $tableColumns),
+            new Exception(sprintf("These columns {%s} are not exists in the table", implode(', ', $nonExistentColumns)))
+        );
 
         return true;
     }
