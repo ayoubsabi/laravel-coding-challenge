@@ -64,7 +64,7 @@ class ProductController extends Controller
         return $this->showOne(new Resource(
                 $this->productService->updateProduct($product, $request->all())
             ),
-            Response::HTTP_CREATED
+            Response::HTTP_OK
         );
     }
 

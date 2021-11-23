@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -68,19 +67,14 @@ class ProductRepository extends BaseRepository
     }
 
     /**
-     * @method create(array $data, ?Category $category = null)
+     * @method create(array $data)
      * 
      * @param array $data
-     * @param Category $parent
      * 
      * @return Product
      */
-    public function create(array $data, ?Category $category = null): Product
+    public function create(array $data): Product
     {
-        if ($category) {
-            return $category->products($data);
-        }
-
         return Product::create($data);
     }
 
