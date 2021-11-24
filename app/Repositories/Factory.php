@@ -25,7 +25,7 @@ class Factory
 
         throw_if(
             ! $repository instanceof AbstractRepository,
-            new Exception("This class is not an instance of AbstractRepository")
+            new Exception(sprintf("This class is not an instance of %s", AbstractRepository::class))
         );
 
         return $repository;

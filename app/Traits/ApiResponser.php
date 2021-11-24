@@ -41,15 +41,13 @@ trait ApiResponser
     }
 
     /**
-     * @method noContentResponse(int $code = Response::HTTP_NO_CONTENT)
-     *
-     * @param int $code
+     * @method noContentResponse()
      * 
      * @return JsonResponse
      */
-    protected function noContentResponse(int $code = Response::HTTP_NO_CONTENT): JsonResponse
+    protected function noContentResponse(): JsonResponse
     {
-        return $this->response(null, $code);
+        return $this->response(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
