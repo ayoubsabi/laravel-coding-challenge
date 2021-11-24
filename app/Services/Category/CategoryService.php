@@ -3,6 +3,7 @@
 namespace App\Services\Category;
 
 use Exception;
+use App\Rules\Exists;
 use App\Models\Category;
 use App\Repositories\CategoryRepository;
 use App\Services\Utils\ValidatorService;
@@ -29,11 +30,14 @@ class CategoryService
      */
     public function getCategories(array $criteria, array $orderBy): Paginator
     {
-        $criteria = $this->validatorService->validated($criteria, [
-            'parent_id' => 'integer|exists:App\Models\Category,id'
+        $criteria = $this->validatorService->validate($criteria, [
+            'parent_id' => [
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
-        $orderBy = $this->validatorService->validated($orderBy, [
+        $orderBy = $this->validatorService->validate($orderBy, [
             'name' => 'in:asc,desc',
             'created_at' => 'in:asc,desc'
         ]);
@@ -62,9 +66,13 @@ class CategoryService
      */
     public function createCategory(array $data): Category
     {
-        $data = $this->validatorService->validated($data, [
+        $data = $this->validatorService->validate($data, [
             'name' => 'required|string',
-            'parent_id' => 'nullable|integer|exists:App\Models\Category,id'
+            'parent_id' => [
+                'nullable',
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
         return $this->categoryRepository->create($data);
@@ -80,9 +88,12 @@ class CategoryService
      */
     public function updateCategory(Category $category, array $data): Category
     {
-        $data = $this->validatorService->validated($data, [
+        $data = $this->validatorService->validate($data, [
             'name' => 'required|string',
-            'parent_id' => 'integer|exists:App\Models\Category,id'
+            'parent_id' => [
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
         throw_if(

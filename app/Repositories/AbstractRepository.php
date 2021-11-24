@@ -6,7 +6,7 @@ use App\Traits\TableColumnsChecker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 
-abstract class BaseRepository
+abstract class AbstractRepository
 {
     use TableColumnsChecker;
 

@@ -23,7 +23,7 @@ class ProductCreationTest extends TestCase
         $this->post('/api/products', [
             'name' => $faker->word,
             'description' => $faker->paragraph,
-            'category_id' => $categories[rand(0, count($categories) - 1)]->id, 
+            'category_id' => $categories[rand(0, count($categories) - 1)]->id,
             'price' => $faker->randomFloat(2, 0, 10000),
             'image' => UploadedFile::fake()->image('thread.png')
         ])->assertStatus(201);

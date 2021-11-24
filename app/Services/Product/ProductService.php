@@ -4,7 +4,9 @@ namespace App\Services\Product;
 
 use Exception;
 use App\Models\Product;
+use App\Repositories\CategoryRepository;
 use App\Repositories\ProductRepository;
+use App\Rules\Exists;
 use App\Services\Utils\ValidatorService;
 use App\Services\Utils\LocalFileUploadService;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -34,11 +36,14 @@ class ProductService
      */
     public function getProducts(array $criteria, array $orderBy): Paginator
     {
-        $criteria = $this->validatorService->validated($criteria, [
-            'category_id' => 'integer|exists:App\Models\Category,id'
+        $criteria = $this->validatorService->validate($criteria, [
+            'category_id' => [
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
-        $orderBy = $this->validatorService->validated($orderBy, [
+        $orderBy = $this->validatorService->validate($orderBy, [
             'column' => 'string',
             'orientation' => 'in:asc,desc'
         ]);
@@ -67,12 +72,16 @@ class ProductService
      */
     public function createProduct(array $data): Product
     {
-        $data = $this->validatorService->validated($data, [
+        $data = $this->validatorService->validate($data, [
             'name' => 'required|string',
             'description' => 'required|string',
             'price' => 'required|numeric|min:1|max:9999999',
             'image' => 'required|mimes:jpeg,png,jpg,gif,svg',
-            'category_id' => 'required|integer|exists:App\Models\Category,id'
+            'category_id' => [
+                'required',
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
         return $this->productRepository->create(
@@ -92,12 +101,15 @@ class ProductService
      */
     public function updateProduct(Product $product, array $data): Product
     {
-        $data = $this->validatorService->validated($data, [
+        $data = $this->validatorService->validate($data, [
             'name' => 'string',
             'description' => 'string',
             'price' => 'numeric|min:1|max:9999999',
             'image' => 'mimes:jpeg,png,jpg,gif,svg',
-            'category_id' => 'integer|exists:App\Models\Category,id',
+            'category_id' => [
+                'integer',
+                new Exists(CategoryRepository::class, 'id')
+            ]
         ]);
 
         if (isset($data['image'])) {

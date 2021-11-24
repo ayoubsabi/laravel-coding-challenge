@@ -2,20 +2,27 @@
 
 namespace App\Services\Utils;
 
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Contracts\Validation\Factory as ValidatorFactory;
 
 class ValidatorService
 {
+    private $validatorFactory;
+
+    public function __construct(ValidatorFactory $validatorFactory)
+    {
+        $this->validatorFactory = $validatorFactory;
+    }
+
     /**
-     * @method validated(array $data, array $rules)
+     * @method validate(array $data, array $rules)
      *
      * @param array $data
      * @param array $rules
      * 
      * @return array
      */
-    public function validated(array $data, array $rules): array
+    public function validate(array $data, array $rules): array
     {
-        return Validator::make($data, $rules)->validated();
+        return $this->validatorFactory->make($data, $rules)->validate();
     }
 }

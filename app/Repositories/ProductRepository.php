@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class ProductRepository extends BaseRepository
+class ProductRepository extends AbstractRepository
 {
     const PRODUCT_FIELDS = [
         'id', 'category_id', 'name', 'image', 'price', 'description', 'created_at', 'updated_at'

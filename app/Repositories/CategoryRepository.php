@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class CategoryRepository extends BaseRepository
+class CategoryRepository extends AbstractRepository
 {
     const CATEGORY_FIELDS = [
         'id', 'parent_id', 'name', 'created_at', 'updated_at'
